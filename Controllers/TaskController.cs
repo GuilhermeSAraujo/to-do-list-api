@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using todo_list_api.Models;
 
 namespace todo_list_api.Controllers
 {
@@ -6,8 +7,8 @@ namespace todo_list_api.Controllers
     [ApiController]
     public class TaskController : ControllerBase
     {
-        public int Id = 1;
-        public List<Task> Tasks = new(); 
+        public static int Id = 1;
+        public static List<TodoTask> Tasks = new();
 
         // GET: api/<Task>
         [HttpGet]
@@ -20,7 +21,7 @@ namespace todo_list_api.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            foreach (Task Task in Tasks)
+            foreach (TodoTask Task in Tasks)
             {
                 if (Task.Id == id)
                 {
@@ -32,23 +33,44 @@ namespace todo_list_api.Controllers
 
         // POST api/<Task>
         [HttpPost]
-        public void Post([FromBody] string content)
+        public IActionResult Post([FromBody] string content)
         {
             int id = Id++;
-            Task newTask = new();
+            TodoTask newTask = new(id,content);
             Tasks.Add(newTask);
+            return Ok(newTask);
         }
 
         // PUT api/<Task>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IActionResult Put(int id, [FromBody] string value)
         {
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+                if (Tasks[i].Id == id)
+                {
+                    TodoTask updatedTask = new(id, value);
+                    Tasks[i] = updatedTask;
+                    return Ok(updatedTask);
+                }
+            }
+            return NotFound(id);
         }
 
         // DELETE api/<Task>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+                if(Tasks[i].Id == id)
+                {
+                    var task = Tasks[i];
+                    Tasks.RemoveAt(i);
+                    return Ok(task);
+                }
+            }
+            return NotFound(id);
         }
     }
 }
